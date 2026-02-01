@@ -1,3 +1,35 @@
 app/models/
 *.onnx
 *.bin
+
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+*.log
+
+# Virtual environment
+.venv/
+env/
+venv/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Logs
+logs/
+
+# Temporary files
+/tmp/
+*.tmp
+*.swp
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Docker / environment
+*.env
