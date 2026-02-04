@@ -14,7 +14,7 @@ USER user
 
 ENV HOME=/home/user \
     PATH=/home/user/.local/bin:$PATH \
-    PYTHONPATH=/home/user/app \
+    PYTHONPATH=/home/user/app/app:/home/user/app \
     WEB_CONCURRENCY=1 \
     PORT=7860 \
     HF_HOME=/home/user/.cache/huggingface
@@ -23,18 +23,19 @@ WORKDIR $HOME/app
 
 RUN mkdir -p /home/user/.cache/huggingface
 
-
 COPY --chown=user requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip \
  && pip install --no-cache-dir -r requirements.txt
 
 
-RUN mkdir -p models
-RUN wget -O models/voices-v1.0.bin https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/voices-v1.0.bin
-RUN wget -O models/kokoro-v1.0.onnx https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/kokoro-v1.0.onnx
+RUN mkdir -p app/models
+RUN wget -O app/models/voices-v1.0.bin https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/voices-v1.0.bin
+RUN wget -O app/models/kokoro-v1.0.onnx https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/kokoro-v1.0.onnx
+
 
 COPY --chown=user . .
 
 EXPOSE 7860
 
-CMD ["gunicorn", "-k", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:7860", "--workers", "1", "main:app"]
+
+CMD ["gunicorn", "-k", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:7860", "--workers", "1", "--chdir", "app", "main:app"]
