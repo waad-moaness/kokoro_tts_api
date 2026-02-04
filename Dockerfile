@@ -7,7 +7,6 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-
 RUN useradd -m -u 1000 user
 USER user
 
@@ -16,8 +15,7 @@ ENV HOME=/home/user \
     PYTHONPATH=/home/user/app \
     WEB_CONCURRENCY=1 \
     PORT=7860 \
-    HF_HOME=/home/user/.cache/huggingface \
-    TRANSFORMERS_CACHE=/home/user/.cache/huggingface
+    HF_HOME=/home/user/.cache/huggingface
 
 WORKDIR $HOME/app
 
@@ -27,14 +25,12 @@ COPY --chown=user requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip \
  && pip install --no-cache-dir -r requirements.txt
 
-COPY --chown=user ./app .
+RUN mkdir -p models
+RUN wget -O models/voices-v1.0.bin https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/voices-v1.0.bin
+RUN wget -O models/kokoro-v1.0.onnx https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/kokoro-v1.0.onnx
+
+COPY --chown=user . .
 
 EXPOSE 7860
-
-RUN mkdir -p models
-
-RUN wget -O models/voices-v1.0.bin https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/voices-v1.0.bin
-
-RUN wget -O models/kokoro-v1.0.onnx https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/kokoro-v1.0.onnx
 
 CMD ["gunicorn", "-k", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:7860", "--workers", "1", "main:app"]
