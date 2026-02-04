@@ -2,7 +2,6 @@ app/models/
 *.onnx
 *.bin
 
-
 # Python
 __pycache__/
 *.py[cod]
