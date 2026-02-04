@@ -1,0 +1,7 @@
+fastapi==0.110.3
+kokoro_onnx==0.4.9
+numpy==2.0.2
+requests>=2.30
+uvicorn[standard]
+gunicorn
+soundfile
