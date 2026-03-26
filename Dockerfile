@@ -1,14 +1,15 @@
 FROM tiangolo/uvicorn-gunicorn-fastapi:python3.11
 
-
+# 1. Install system dependencies (Root)
 RUN apt-get update && apt-get install -y \
     ffmpeg \
     libgl1 \
     espeak-ng \
+    wget \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-
+# 2. Setup user and environment
 RUN useradd -m -u 1000 user
 USER user
 
@@ -21,21 +22,25 @@ ENV HOME=/home/user \
 
 WORKDIR $HOME/app
 
-RUN mkdir -p /home/user/.cache/huggingface
+# 3. Create cache and models directory
+RUN mkdir -p /home/user/.cache/huggingface app/models
 
+# 4. DOWNLOAD MODELS FIRST (The "Heavy" Lift)
+# By putting these here, they are cached as a separate layer.
+# Changing your code later will NOT trigger a re-download.
+RUN wget -q -O app/models/voices-v1.0.bin https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/voices-v1.0.bin && \
+    wget -q -O app/models/kokoro-v1.0.onnx https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/kokoro-v1.0.onnx
+
+# 5. Install Python dependencies
+# We do this before copying your actual code to keep the cache clean.
 COPY --chown=user requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip \
  && pip install --no-cache-dir -r requirements.txt
 
-
-RUN mkdir -p app/models
-RUN wget -O app/models/voices-v1.0.bin https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/voices-v1.0.bin
-RUN wget -O app/models/kokoro-v1.0.onnx https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/kokoro-v1.0.onnx
-
-
+# 6. Copy your application code last
+# Only this step runs when you update your main.py
 COPY --chown=user . .
 
 EXPOSE 7860
-
 
 CMD ["gunicorn", "-k", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:7860", "--workers", "1", "--chdir", "app", "main:app"]
