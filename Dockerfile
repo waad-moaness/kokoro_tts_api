@@ -39,4 +39,5 @@ COPY --chown=user . .
 
 EXPOSE 7860
 
-CMD ["gunicorn", "-k", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:7860", "--workers", "1", "--chdir", "app", "main:app"]
+# Change the timeout from the default 30s to 120s
+CMD ["gunicorn", "-k", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:7860", "--workers", "1", "--timeout", "120", "--chdir", "app", "main:app"]

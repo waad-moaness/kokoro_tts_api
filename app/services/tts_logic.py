@@ -8,7 +8,17 @@ _SENTENCE_REGEX = re.compile(
 )
 
 def split_text(text: str) -> list[str]:
-    return [s.strip() for s in _SENTENCE_REGEX.split(text) if s.strip()]
+    chunks = [s.strip() for s in _SENTENCE_REGEX.split(text) if s.strip()]
+    
+    final_chunks = []
+    for chunk in chunks:
+        if len(chunk) > 250:
+            words = chunk.split(' ')
+            for i in range(0, len(words), 15):
+                final_chunks.append(" ".join(words[i:i+15]))
+        else:
+            final_chunks.append(chunk)
+    return final_chunks
 
 def generate_speech(
     text: str,
