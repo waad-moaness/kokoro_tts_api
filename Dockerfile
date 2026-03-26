@@ -43,4 +43,4 @@ COPY --chown=user . .
 
 EXPOSE 7860
 
-CMD ["gunicorn", "-k", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:7860", "--workers", "1", "--chdir", "app", "main:app"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "7860"]
